@@ -1,17 +1,18 @@
-class User:
+from pydantic import BaseModel
+
+
+class User(BaseModel):
     
-    def __init__(self, user_id: int, username: str, email: str, password: str):
-        
-        self.user_id = user_id
-        self.username = username
-        self.email = email
-        self.password = password
+    username: str
+    user_id: int
+    email: str
+    password: str
 
     def to_dict(self):
         return {
             "user_id": self.user_id,
             "username": self.username,
-            "email": self.email
+            "email": self.email,
         }
     
 class Note:

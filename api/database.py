@@ -1,7 +1,7 @@
 import datetime
 import sqlite3
 
-from models import Note
+from models import Note, User
 
 
 def get_db():
@@ -21,7 +21,8 @@ def create_tables():
                 CREATE TABLE IF NOT EXISTS users (
                     user_id INTEGER PRIMARY KEY AUTOINCREMENT,
                     username TEXT NOT NULL UNIQUE,
-                    password TEXT NOT NULL
+                    password TEXT NOT NULL,
+                    email TEXT NOT NULL UNIQUE
                 )  
             """
     
@@ -42,7 +43,7 @@ def create_tables():
 
     close_db(db)
 
-def add_user(username, password, email):
+def add_user(username, password, email) -> User:
     db = get_db()
     cursor = db.cursor()
 
@@ -50,6 +51,20 @@ def add_user(username, password, email):
     cursor.execute(add_user_sql, (username, password, email))
     db.commit()
     close_db(db)
+
+    return get_user_by_username(username)
+
+def get_user_by_username(username):
+    db = get_db()
+    cursor = db.cursor()
+
+    get_user_sql = "SELECT * FROM users WHERE users.username = ?"
+    cursor.execute(get_user_sql, (username,))
+
+    user = cursor.fetchone()
+    close_db(db)
+
+    return user
 
 def add_note(user_id, content):
     db = get_db()
@@ -69,6 +84,9 @@ def get_notes_by_user(user_id):
 
     get_notes_sql = "SELECT * FROM notes WHERE notes.user_id = ?"
     cursor.execute(get_notes_sql, (user_id,))
+
+    close_db(db)
+
     return cursor.fetchall()
 
 def get_note_by_id(note_id, user_id):
@@ -79,6 +97,9 @@ def get_note_by_id(note_id, user_id):
     cursor.execute(get_note_sql, (note_id, user_id))
 
     result = cursor.fetchone()
+
+    close_db(db)
+
     if result: 
         return Note(**result)
     return None
