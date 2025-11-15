@@ -66,28 +66,37 @@ def get_user_by_username(username):
 
     return user
 
-def add_note(user_id, content):
+def add_note(user_id: int, content: str) -> Note:
     db = get_db()
     cursor = db.cursor()
 
-    add_note_sql = "INSER INTO notes (content, user_id, created_at, modified_at)"
+    add_note_sql = "INSERT INTO notes (content, user_id, created_at, modified_at) VALUES (?, ?, ?, ?)"
     created_at = datetime.datetime.now()
     modified_at = created_at
 
     cursor.execute(add_note_sql, (content, user_id, created_at, modified_at))
     db.commit()
+
+    last_row_id = cursor.lastrowid
+    print(last_row_id)
+
+    get_latest_note_sql = "SELECT * FROM notes WHERE note_id = ?"
+    cursor.execute(get_latest_note_sql, (last_row_id,))
+    note: Note = cursor.fetchone()
     close_db(db)
 
-def get_notes_by_user(user_id):
+    return note
+
+def get_notes_by_user_id(user_id):
     db = get_db()
     cursor = db.cursor()
 
     get_notes_sql = "SELECT * FROM notes WHERE notes.user_id = ?"
     cursor.execute(get_notes_sql, (user_id,))
-
+    notes = cursor.fetchall()
     close_db(db)
 
-    return cursor.fetchall()
+    return notes
 
 def get_note_by_id(note_id, user_id):
     db = get_db()
@@ -104,7 +113,7 @@ def get_note_by_id(note_id, user_id):
         return Note(**result)
     return None
 
-def update_note(note_id, user_id, content):
+def update_note_by_note_id_and_user_id(note_id, user_id, content) -> Note:
     db = get_db()
     cursor = db.cursor()
 
@@ -114,6 +123,6 @@ def update_note(note_id, user_id, content):
     db.commit()
     close_db(db)
     if cursor.rowcount > 0:
-        return get_note_by_id(user_id, note_id)
+        return get_note_by_id(note_id, user_id)
     else: 
         return None

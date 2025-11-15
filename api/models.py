@@ -15,15 +15,13 @@ class User(BaseModel):
             "email": self.email,
         }
     
-class Note:
+class Note(BaseModel):
 
-    def __init__(self, note_id, user_id, content, created_at, modified_at):
-
-        self.note_id = note_id
-        self.user_id = user_id
-        self.content = content
-        self.created_at = created_at
-        self.modified_at = modified_at
+    note_id: int
+    user_id: int
+    content: str
+    created_at: str
+    modified_at: str
     
     def to_dict(self):
         return {
